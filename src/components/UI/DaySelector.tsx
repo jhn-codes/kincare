@@ -47,12 +47,16 @@ const DaySelector: React.FC<DaySelectorProps> = ({
         }
 
         setDays(generatedDays);
-        setCurrentMonth(`${monthNames[today.getMonth()]} ${today.getFullYear()}`);
 
-        if (!selectedDay && generatedDays.length > 0) {
-            onDaySelect(generatedDays[0].fullDate.toDateString());
+        if (selectedDay) {
+            const selectedDate = new Date(selectedDay);
+            setCurrentMonth(`${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`);
+        } else if (generatedDays.length > 0) {
+            const firstDay = generatedDays[0].fullDate;
+            setCurrentMonth(`${monthNames[firstDay.getMonth()]} ${firstDay.getFullYear()}`);
+            onDaySelect(firstDay.toDateString());
         }
-    }, [numberOfDays, selectedDay, onDaySelect]);
+    }, [numberOfDays, selectedDay]);
 
     const isSelected = (day: DayInfo) => selectedDay === day.fullDate.toDateString();
 
@@ -107,8 +111,9 @@ const styles = StyleSheet.create({
         paddingVertical: hp(1),
     },
     monthText: {
-        fontSize: ms(14),
-        fontWeight: '500',
+        fontSize: ms(16),
+        fontWeight: '600',
+        color: '#fff'
     },
     daysContainer: {
         flexDirection: 'row',
@@ -120,35 +125,38 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         minWidth: wp(14),
         padding: wp(2),
-        borderWidth: 1,
-        borderColor: '#f8f8f8',
-        borderRadius: wp(2),
+        borderWidth: 2,
+        borderColor: '#1a1a1a',
+        borderRadius: hp(2),
     },
     selectedDayButton: {
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#fff',
     },
     todayButton: {
-        borderColor: '#333',
+        borderColor: '#fff',
     },
     dayName: {
         fontSize: ms(12),
-        color: '#444',
+        color: '#fff',
+        fontWeight: '600',
     },
     dayNumber: {
-        fontSize: ms(14),
-        fontWeight: '500',
-        color: '#444',
+        fontSize: ms(16),
+        fontWeight: '700',
+        color: '#fff',
         marginBottom: ms(2),
     },
     selectedDayText: {
-        color: '#000000',
+        color: '#1a1a1a',
+        fontWeight: '600',
     },
     todayText: {
-        color: '#000',
-        fontWeight: '500',
+        color: '#fff',
+        fontWeight: '600',
     },
     todaySelectedText: {
         color: '#00ACC1',
+        fontWeight: '600',
     },
 });
 

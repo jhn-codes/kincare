@@ -1,6 +1,8 @@
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { ms } from 'react-native-size-matters';
+
 interface ButtonProps {
   title: string;
   onPress?: () => void;
@@ -8,6 +10,7 @@ interface ButtonProps {
   disabled?: boolean;
   style?: {};
   textStyle?: {};
+  disabledTextStyle?: {};
   activeOpacity?: number;
 };
 
@@ -18,14 +21,14 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   style = {},
   textStyle = {},
+  disabledTextStyle = {},
   activeOpacity = 0.8,
   ...props
 }) => {
   const buttonStyle = [
     styles.baseButton,
-    variant === 'primary' ? styles.primaryButton :
     variant === 'secondary' ? styles.secondaryButton :
-    variant === 'text' ? styles.textButton : styles.primaryButton,
+    variant === 'text' ? styles.textButton : null,
     disabled && styles.disabledButton,
     style,
   ];
@@ -35,9 +38,31 @@ const Button: React.FC<ButtonProps> = ({
     variant === 'primary' ? styles.primaryButtonText :
     variant === 'secondary' ? styles.secondaryButtonText :
     variant === 'text' ? styles.textButtonText : styles.primaryButtonText,
-    disabled && styles.disabledButtonText,
+    disabled && [styles.disabledButtonText, disabledTextStyle],
     textStyle,
   ];
+
+  if (variant === 'primary') {
+    return (
+      <TouchableOpacity
+        key={variant}
+        onPress={onPress}
+        activeOpacity={disabled ? 1 : activeOpacity}
+        disabled={disabled}
+        style={[styles.primaryGradientWrapper, style]}
+        {...props}
+      >
+        <LinearGradient
+          colors={['#00ACC1', '#2196F3']}
+          style={[styles.baseButton, styles.primaryGradient]}
+        >
+          <Text style={buttonTextStyle}>
+            {title}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <TouchableOpacity
@@ -55,24 +80,26 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-
 const styles = StyleSheet.create({
   baseButton: {
     paddingVertical: hp(1),
     paddingHorizontal: wp(5),
-    borderRadius: hp(4),
+    borderRadius: hp(2),
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: hp(2),
     height: hp(6),
     },
-  primaryButton: {
-    backgroundColor: '#60a5fa',
+  primaryGradientWrapper: {
     elevation: 3,
   },
+  primaryGradient: {
+    elevation: 0,
+    width: '100%',
+  },
   secondaryButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#000000',
+    backgroundColor: '#fff',
+    borderColor: '#60a5fa',
     borderWidth: 1,
     elevation: 1,
   },
@@ -94,13 +121,13 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif-medium',
   },
   primaryButtonText: {
-    color: '#000000',
+    color: '#fff',
   },
   secondaryButtonText: {
-    color: '#000000',
+    color: '#60a5fa',
   },
   textButtonText: {
-    color: '#000000',
+    color: '#60a5fa',
   },
   disabledButtonText: {
     color: '#666'

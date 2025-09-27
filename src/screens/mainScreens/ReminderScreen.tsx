@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { ms } from 'react-native-size-matters';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
+import CalendarComponent from '../../components/UI/Calendar';
 
 const Reminder = () => {
   return (
@@ -13,7 +13,9 @@ const Reminder = () => {
                 <Text style={styles.title}>
                     Reminders
                 </Text>
-                <MaterialIcons name='history' size={30}/>
+                <TouchableOpacity>
+                    <MaterialIcons name='history' size={30}/>
+                </TouchableOpacity>
             </View>
             <View style={styles.scheduleContainer}>
                 <Text style={styles.title}>

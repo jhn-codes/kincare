@@ -1,14 +1,25 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '../../components/UI/Button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ms  } from 'react-native-size-matters';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { ms } from 'react-native-size-matters';
+import Button from '../../components/UI/Button';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
 
-const Welcome = ({navigation} : Props) => {
+const Welcome = ({ navigation }: Props) => {
+
+    const handleGetStarted = async () => {
+        try {
+            await AsyncStorage.setItem('hasLaunched', 'true');
+            navigation.navigate('SignUp');
+        } catch (e) {
+            console.error("Failed to save launch flag", e);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <Image
@@ -32,7 +43,7 @@ const Welcome = ({navigation} : Props) => {
                 <View style={styles.buttonContainer}>
                     <Button
                         title='Get Started'
-                        onPress={() => navigation.navigate('SignUp')}
+                        onPress={handleGetStarted}
                     />
                 </View>
             </View>
@@ -40,7 +51,7 @@ const Welcome = ({navigation} : Props) => {
     );
 };
 
-const styles=StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f8f8',
@@ -61,15 +72,14 @@ const styles=StyleSheet.create({
         marginTop: hp(8),
     },
     title: {
+        color: '#1a1a1a',
         fontSize: ms(30),
         fontWeight: 'bold',
-        fontFamily:'RedRose-Regular',
     },
     subtitle: {
         marginTop: hp(.8),
         fontSize: ms(14),
-        fontWeight: 600,
-        fontFamily:'sans-serif',
+        fontWeight: '600',
     },
     buttonContainer: {
         width: '100%',

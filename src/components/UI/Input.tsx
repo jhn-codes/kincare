@@ -34,7 +34,24 @@ const Input: React.FC<InputProps> = ({
     const [inputValue, setInputValue] = useState<string>(value || '');
 
     // Animation for floating label
-    const labelAnimation = useRef(new Animated.Value(inputValue ? 1 : 0)).current;
+    const labelAnimation = useRef(new Animated.Value(value ? 1 : 0)).current;
+
+    const animateLabel = (focused: boolean) => {
+        Animated.timing(labelAnimation, {
+            toValue: focused ? 1 : 0,
+            duration: 150,
+            useNativeDriver: false,
+        }).start();
+    };
+
+    React.useEffect(() => {
+        // Only update if the prop value is different from the current state
+        if (value !== inputValue) {
+            setInputValue(value || '');
+            // Also update the floating label animation based on the new value
+            animateLabel(!!value || isFocused);
+        }
+    }, [value, isFocused]);
 
     const handleFocus = (e: any) => {
         setIsFocused(true);
@@ -60,14 +77,6 @@ const Input: React.FC<InputProps> = ({
         } else if (!text && !isFocused) {
             animateLabel(false);
         }
-    };
-
-    const animateLabel = (focused: boolean) => {
-        Animated.timing(labelAnimation, {
-            toValue: focused ? 1 : 0,
-            duration: 150,
-            useNativeDriver: false,
-        }).start();
     };
 
     const togglePasswordVisibility = () => {
@@ -150,14 +159,14 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     input: {
-        borderWidth: 2,
+        borderWidth: ms(2),
         borderRadius: hp(2),
         paddingHorizontal: wp(5),
         paddingTop: hp(2),
         paddingBottom: hp(1.2),
         fontSize: ms(14),
-        backgroundColor: '#f8f8f8',
-        color: '#000',
+        backgroundColor: '#fff',
+        color: '#1a1a1a',
         height: hp(7),
         textAlignVertical: 'bottom',
         includeFontPadding: false,

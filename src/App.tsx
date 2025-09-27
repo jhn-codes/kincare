@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
+import AppNavigation from './navigation/AppNavigation';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Orientation from 'react-native-orientation-locker'
-import AuthNavigation from './navigation/AuthNavigation';
-import MainNavigation from './navigation/MainNavigation';
-import AppNavigation from './navigation/AppNavigation';
-import { StatusBar } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './config/toastConfig';
 
 const App = () => {
     useEffect(() => {
@@ -14,16 +13,13 @@ const App = () => {
         };
     }, []);
 
-    useEffect(() => {
-        StatusBar.setBarStyle('dark-content', true);
-    }, []);
-
     return (
-        <SafeAreaProvider>
-            <MainNavigation />
-            {/* <MainNavigation /> */}
-            {/* <AppNavigation /> */}
-        </SafeAreaProvider>
+        <>
+            <SafeAreaProvider>
+                <AppNavigation />
+            </SafeAreaProvider>
+            <Toast config={toastConfig}/>
+        </>
     );
 };
 

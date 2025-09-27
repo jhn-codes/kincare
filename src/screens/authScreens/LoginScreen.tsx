@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Alert, View, Text, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, Image, StyleSheet, KeyboardAvoidingView, Platform, BackHandler, ToastAndroid } from 'react-native';
+import { getAuth, signInWithEmailAndPassword } from '@react-native-firebase/auth';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { ms } from 'react-native-size-matters';
+import Toast from 'react-native-toast-message';
 import Input from '../../components/UI/Input';
 import Button from '../../components/UI/Button';
 
@@ -13,16 +16,91 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 const Login = ({navigation} : Props) => {
 	const [email, setEmail] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
-	const [loading, isLoading] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 
-const handleLogin = () => {
-	if(!email || !password) {
-	   Alert.alert('Invalid', `I'll fuck you first`);
-	} else {
-		//navigation.navigate('Home');
-		Alert.alert('Bakla', 'ni edgar')
+	useFocusEffect(
+        React.useCallback(() => {
+            let backPressedOnce = false;
+
+            const onBackPress = () => {
+                if (backPressedOnce) {
+                    BackHandler.exitApp();
+                    return true;
+                }
+
+                backPressedOnce = true;
+                ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
+                
+                setTimeout(() => {
+                    backPressedOnce = false;
+                }, 2000);
+
+                return true;
+            };
+
+            const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+            return () => subscription?.remove();
+        }, [])
+    );
+
+	const handleLogin = async () => {
+		if (!email || !password) {
+			Toast.show({
+				type: 'error',
+				text1: 'Missing Information',
+				text2: 'Please enter both email and password',
+				visibilityTime: 3000,
+			});
+			return;
+		}
+
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			Toast.show({
+				type: 'error',
+				text1: 'Invalid Email',
+				text2: 'Please enter a valid email address',
+				visibilityTime: 3000,
+			});
+			return;
+		};
+
+		setLoading(true);
+
+		try {
+			const auth = getAuth();
+			await signInWithEmailAndPassword(auth, email, password);
+			
+		} catch (error: any) {
+
+			let errorMessage = 'An error occurred during login';
+
+			switch (error.code) {
+				case 'auth/invalid-email':
+					errorMessage = 'Invalid email address';
+					break;
+				case 'auth/user-disabled':
+					errorMessage = 'This account has been disabled';
+					break;
+				case 'auth/too-many-requests':
+					errorMessage = 'Too many failed login attempts. Please try again later';
+					break;
+				case 'auth/invalid-credential':
+					errorMessage = 'Invalid email or password';
+					break;
+				default:
+					errorMessage = error.message || 'Login failed';
+			}
+			Toast.show({
+				type: 'error',
+				text1: 'Login Error',
+				text2: errorMessage,
+				visibilityTime: 3000,
+			});
+		} finally {
+			setLoading(false);
+		}
 	};
-};
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -52,6 +130,9 @@ const handleLogin = () => {
 							label="Email"
 							value={email}
 							onChangeText={setEmail}
+							keyboardType="email-address"
+							autoCapitalize="none"
+							editable={!loading}
 						/>
 				
 						<Input
@@ -60,6 +141,7 @@ const handleLogin = () => {
 							value={password}
 							onChangeText={setPassword}
 							containerStyle={styles.input}
+							editable={!loading}
 						/>
 					</View>
 					<Button
@@ -68,11 +150,14 @@ const handleLogin = () => {
 						onPress={() => navigation.navigate('ForgotPassword')}
 						textStyle={styles.forgotPasswordText}
 						style={styles.forgotPassword}
+						disabled={loading}
 					/>
 					<Button
 						style={styles.loginButton}
-						title="Login"
+						title={loading ? "Signing In..." : "Login"}
 						onPress={handleLogin}
+						disabled={loading}
+						disabledTextStyle={{ color: '#fff' }}
 					/>
 					<View style={styles.signUpContainer}>
 						<Button
@@ -85,6 +170,7 @@ const handleLogin = () => {
 							variant="text"
 							onPress={() => navigation.navigate('SignUp')}
 							textStyle={styles.signUpText}
+							disabled={loading}
 						/>
 					</View>
 				</View>
@@ -96,7 +182,7 @@ const handleLogin = () => {
 const styles=StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f8f8f8',
+		backgroundColor: '#fff',
 	},
 	backgroundImage: {
 		position: 'absolute',
@@ -118,10 +204,12 @@ const styles=StyleSheet.create({
 	},
 	title: {
         marginBottom: hp(3),
+		color: '#1a1a1a',
 		fontSize: ms(28),
 		fontWeight: 'bold',
 	},
 	subtitle: {
+		color: '#1a1a1a',
 		fontSize: ms(14),
 		fontWeight: '500',
 	},
@@ -138,7 +226,7 @@ const styles=StyleSheet.create({
 	},
 	forgotPasswordText: {
 		fontSize: ms(12),
-		color: '#60a5fa',
+		color: '#007AFF',
 	},
 	loginButton: {
 		width: '100%'
@@ -149,7 +237,7 @@ const styles=StyleSheet.create({
 	},
 	signUpText: {
 		fontWeight: '600',
-        color: '#60a5fa',
+		color: '#007AFF',
 		textDecorationLine: 'underline',
 	},
 });

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native'
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { ms } from 'react-native-size-matters';
-
 
 const Greetings = ({userName = 'user'}) => {
     const [ greeting, setGreeting ] = useState('');
@@ -52,10 +50,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     greetingText: {
+        color: '#1a1a1a',
         fontSize: ms(18),
         fontWeight: '600',
     },
     userName: {
+        color: '#1a1a1a',
         fontSize: ms(18),
         fontWeight: '500',
     },
